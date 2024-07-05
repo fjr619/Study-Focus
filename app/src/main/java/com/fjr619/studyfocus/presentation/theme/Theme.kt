@@ -1,4 +1,4 @@
-package com.fjr619.studyfocus.ui.theme
+package com.fjr619.studyfocus.presentation.theme
 
 import android.app.Activity
 import android.os.Build
