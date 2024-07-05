@@ -10,9 +10,17 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.fjr619.studyfocus.domain.Dummy
+import com.fjr619.studyfocus.domain.model.Subject
+import com.fjr619.studyfocus.presentation.components.AddSubjectDialog
 import com.fjr619.studyfocus.presentation.components.StudySessionsList
 import com.fjr619.studyfocus.presentation.components.TasksList
 import com.fjr619.studyfocus.presentation.dashboard.components.CountCardsSection
@@ -23,6 +31,23 @@ import com.fjr619.studyfocus.presentation.dashboard.components.SubjectCardsSecti
 fun DashboardScreen(
     modifier: Modifier = Modifier
 ) {
+
+    var isAddSubjectDialogOpen by rememberSaveable { mutableStateOf(false) }
+    var subjectName by remember { mutableStateOf("") }
+    var goalHours by remember { mutableStateOf("") }
+    var selectedColor by remember { mutableStateOf(listOf<Color>()) }
+
+    AddSubjectDialog(
+        isOpen = isAddSubjectDialogOpen,
+        selectedColors = selectedColor,
+        subjectName = subjectName,
+        goalHours = goalHours,
+        onColorChange =  { selectedColor = it },
+        onSubjectNameChange = { subjectName = it },
+        onGoalHoursChange = { goalHours = it },
+        onDismissRequest = { isAddSubjectDialogOpen = false },
+        onConfirmButtonClick = { isAddSubjectDialogOpen = false }
+    )
 
     Scaffold(
         topBar = {
@@ -48,7 +73,9 @@ fun DashboardScreen(
                 SubjectCardsSection(
                     modifier = Modifier.fillMaxWidth(),
                     subjectList = Dummy.subjects,
-                    onAddIconClicked = { /*TODO*/ }
+                    onAddIconClicked = {
+                        selectedColor = Subject.subjectCardColors.random()
+                        isAddSubjectDialogOpen = true }
                 )
             }
             item {
