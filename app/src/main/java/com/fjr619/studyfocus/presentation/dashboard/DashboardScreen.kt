@@ -29,7 +29,8 @@ import com.fjr619.studyfocus.presentation.dashboard.components.SubjectCardsSecti
 
 @Composable
 fun DashboardScreen(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onNavigateSubject: (Subject) -> Unit
 ) {
 
     var isAddSubjectDialogOpen by rememberSaveable { mutableStateOf(false) }
@@ -75,7 +76,8 @@ fun DashboardScreen(
                     subjectList = Dummy.subjects,
                     onAddIconClicked = {
                         selectedColor = Subject.subjectCardColors.random()
-                        isAddSubjectDialogOpen = true }
+                        isAddSubjectDialogOpen = true },
+                    onSubjectClicked = onNavigateSubject
                 )
             }
             item {

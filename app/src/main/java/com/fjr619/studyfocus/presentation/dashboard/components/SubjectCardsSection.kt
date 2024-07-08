@@ -35,7 +35,8 @@ internal fun SubjectCardsSection(
     modifier: Modifier = Modifier,
     subjectList: List<Subject>,
     emptyListText: String = "You don't have any subjects.\n Click the + button to add new subject.",
-    onAddIconClicked: () -> Unit
+    onAddIconClicked: () -> Unit,
+    onSubjectClicked: (Subject) -> Unit
 ) {
     Column(modifier = modifier) {
         Row(
@@ -81,7 +82,9 @@ internal fun SubjectCardsSection(
                 SubjectCard(
                     subjectName = subject.name,
                     gradientColors = subject.colors,
-                    onClick = { /*TODO*/ }
+                    onClick = {
+                        onSubjectClicked(subject)
+                    }
                 )
             }
         }
@@ -112,6 +115,7 @@ private fun SubjectCardsSectionPreview() {
                 colors = gradient3
             ),
         ),
-        onAddIconClicked = {}
+        onAddIconClicked = {},
+        onSubjectClicked = {}
     )
 }

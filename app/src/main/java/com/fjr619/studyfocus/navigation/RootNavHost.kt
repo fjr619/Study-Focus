@@ -5,6 +5,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.fjr619.studyfocus.presentation.dashboard.DashboardScreen
+import com.fjr619.studyfocus.presentation.session.SessionScreen
 import com.fjr619.studyfocus.presentation.subject.SubjectScreen
 import com.fjr619.studyfocus.presentation.task.TaskScreen
 
@@ -12,9 +13,13 @@ import com.fjr619.studyfocus.presentation.task.TaskScreen
 fun RootNavHost() {
     val navController = rememberNavController()
 
-    NavHost(navController = navController, startDestination = "task") {
+    NavHost(navController = navController, startDestination = "session") {
         composable("dashboard") {
-            DashboardScreen()
+            DashboardScreen(
+                onNavigateSubject = { subject ->
+                    navController.navigate("subject")
+                }
+            )
         }
 
         composable("subject") {
@@ -23,6 +28,10 @@ fun RootNavHost() {
 
         composable("task") {
             TaskScreen()
+        }
+
+        composable("session") {
+            SessionScreen()
         }
     }
 }
