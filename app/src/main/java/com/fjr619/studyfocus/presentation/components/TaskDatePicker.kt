@@ -10,6 +10,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.compose.dropUnlessResumed
 import java.time.Instant
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -26,12 +27,16 @@ fun TaskDatePicker(
         DatePickerDialog(
             onDismissRequest = onDismissRequest,
             confirmButton = {
-                TextButton(onClick = onConfirmButtonClicked) {
+                TextButton(onClick = dropUnlessResumed {
+                    onConfirmButtonClicked()
+                }) {
                     Text(text = confirmButtonText)
                 }
             },
             dismissButton = {
-                TextButton(onClick = onDismissRequest) {
+                TextButton(onClick = dropUnlessResumed {
+                    onDismissRequest()
+                }) {
                     Text(text = dismissButtonText)
                 }
             },

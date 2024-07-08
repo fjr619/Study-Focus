@@ -30,6 +30,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.dropUnlessResumed
 import com.fjr619.studyfocus.domain.model.Subject
 
 @Composable
@@ -86,7 +87,11 @@ fun AddSubjectDialog(
                                         shape = CircleShape
                                     )
                                     .background(brush = Brush.verticalGradient(colors))
-                                    .clickable { onColorChange(colors) }
+                                    .clickable(
+                                        onClick = dropUnlessResumed {
+                                            onColorChange(colors)
+                                        }
+                                    )
                             )
                         }
                     }
@@ -111,13 +116,17 @@ fun AddSubjectDialog(
                 }
             },
             dismissButton = {
-                TextButton(onClick = onDismissRequest) {
+                TextButton(onClick = dropUnlessResumed {
+                    onDismissRequest()
+                }) {
                     Text(text = "Cancel")
                 }
             },
             confirmButton = {
                 TextButton(
-                    onClick = onConfirmButtonClick,
+                    onClick = dropUnlessResumed {
+                        onConfirmButtonClick()
+                    },
                     enabled = subjectNameError == null && goalHoursError == null
                 ) {
                     Text(text = "Save")

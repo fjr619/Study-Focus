@@ -26,11 +26,48 @@ import com.fjr619.studyfocus.presentation.components.TasksList
 import com.fjr619.studyfocus.presentation.dashboard.components.CountCardsSection
 import com.fjr619.studyfocus.presentation.dashboard.components.DashboardTopBar
 import com.fjr619.studyfocus.presentation.dashboard.components.SubjectCardsSection
+import com.fjr619.studyfocus.presentation.destinations.SessionScreenDestination
+import com.fjr619.studyfocus.presentation.destinations.SubjectScreenDestination
+import com.fjr619.studyfocus.presentation.destinations.TaskScreenDestination
+import com.fjr619.studyfocus.presentation.subject.SubjectScreenNavArgs
+import com.fjr619.studyfocus.presentation.task.TaskScreenNavArgs
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.annotation.RootNavGraph
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
+@RootNavGraph(start = true)
+@Destination
 @Composable
 fun DashboardScreen(
+    navigator: DestinationsNavigator
+) {
+    DashboardContent(
+        onSubjectCardClick = { subjectId ->
+            subjectId?.let {
+                navigator.navigate(
+                    SubjectScreenDestination(
+                        SubjectScreenNavArgs(subjectId = it)
+                    )
+                )
+            }
+        },
+        onTaskCardClick = { taskId ->
+            navigator.navigate(
+                TaskScreenDestination(
+                    TaskScreenNavArgs(taskId = taskId, subjectId = null)
+                )
+            )
+        },
+        onStartSessionButtonClick = { navigator.navigate(SessionScreenDestination()) }
+    )
+}
+
+@Composable
+fun DashboardContent(
     modifier: Modifier = Modifier,
-    onNavigateSubject: (Subject) -> Unit
+    onSubjectCardClick: (Int?) -> Unit,
+    onTaskCardClick: (Int?) -> Unit,
+    onStartSessionButtonClick: () -> Unit,
 ) {
 
     var isAddSubjectDialogOpen by rememberSaveable { mutableStateOf(false) }
@@ -43,7 +80,7 @@ fun DashboardScreen(
         selectedColors = selectedColor,
         subjectName = subjectName,
         goalHours = goalHours,
-        onColorChange =  { selectedColor = it },
+        onColorChange = { selectedColor = it },
         onSubjectNameChange = { subjectName = it },
         onGoalHoursChange = { goalHours = it },
         onDismissRequest = { isAddSubjectDialogOpen = false },
@@ -76,13 +113,14 @@ fun DashboardScreen(
                     subjectList = Dummy.subjects,
                     onAddIconClicked = {
                         selectedColor = Subject.subjectCardColors.random()
-                        isAddSubjectDialogOpen = true },
-                    onSubjectClicked = onNavigateSubject
+                        isAddSubjectDialogOpen = true
+                    },
+                    onSubjectClicked = onSubjectCardClick
                 )
             }
             item {
                 Button(
-                    onClick = { /*TODO*/ },
+                    onClick = onStartSessionButtonClick,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 48.dp, vertical = 20.dp)
@@ -97,7 +135,7 @@ fun DashboardScreen(
                         "Click the + button in subject screen to add new task.",
                 tasks = listOf(),
                 onCheckBoxClick = { /*TODO*/ },
-                onTaskCardClick = { /*TODO*/ }
+                onTaskCardClick = onTaskCardClick
             )
 
             item {

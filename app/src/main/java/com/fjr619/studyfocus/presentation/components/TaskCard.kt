@@ -22,6 +22,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.dropUnlessResumed
 import com.fjr619.studyfocus.domain.model.Task
 import com.fjr619.studyfocus.presentation.util.Priority
 
@@ -33,7 +34,11 @@ fun TaskCard(
     onClick: () -> Unit
 ) {
     Card(
-        modifier = modifier.clickable { onClick() },
+        modifier = modifier.clickable(
+            onClick = dropUnlessResumed {
+                onClick()
+            }
+        ),
     ) {
         Row(
             modifier = Modifier

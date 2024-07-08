@@ -25,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.dropUnlessResumed
 import com.fjr619.studyfocus.R
 import com.fjr619.studyfocus.domain.model.Subject
 import com.fjr619.studyfocus.presentation.components.SubjectCard
@@ -36,7 +37,7 @@ internal fun SubjectCardsSection(
     subjectList: List<Subject>,
     emptyListText: String = "You don't have any subjects.\n Click the + button to add new subject.",
     onAddIconClicked: () -> Unit,
-    onSubjectClicked: (Subject) -> Unit
+    onSubjectClicked: (Int?) -> Unit
 ) {
     Column(modifier = modifier) {
         Row(
@@ -51,7 +52,9 @@ internal fun SubjectCardsSection(
                 ),
                 modifier = Modifier.padding(start = 12.dp)
             )
-            IconButton(onClick = onAddIconClicked) {
+            IconButton(onClick = dropUnlessResumed {
+                onAddIconClicked()
+            }) {
                 Icon(
                     imageVector = Icons.Default.Add,
                     contentDescription = "Add Subject"
@@ -82,8 +85,8 @@ internal fun SubjectCardsSection(
                 SubjectCard(
                     subjectName = subject.name,
                     gradientColors = subject.colors,
-                    onClick = {
-                        onSubjectClicked(subject)
+                    onClick = dropUnlessResumed {
+                        onSubjectClicked(subject.subjectId)
                     }
                 )
             }

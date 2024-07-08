@@ -11,7 +11,8 @@ composeBom = "2024.06.00"
 
 room = "2.6.1"
 koin = "3.6.0-Beta4"
-compose-navigation = "2.7.7"
+#compose-navigation = "2.7.7"
+compose-destinations = "1.10.2"
 ksp = "2.0.0-1.0.21"
 google-fonts = "1.6.8"
 desugar_jdk_libs = "2.0.4"
@@ -41,9 +42,12 @@ room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 
-compose-navigation = { module = "androidx.navigation:navigation-compose", version.ref = "compose-navigation" }
+#compose-navigation = { module = "androidx.navigation:navigation-compose", version.ref = "compose-navigation" }
+compose-destination-core = { module = "io.github.raamcosta.compose-destinations:core", version.ref = "compose-destinations" }
+compose-destination-ksp = { module = "io.github.raamcosta.compose-destinations:ksp", version.ref = "compose-destinations" }
 google-fonts = { module = "androidx.compose.ui:ui-text-google-fonts", version.ref = "google-fonts" }
 desugar_jdk_libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar_jdk_libs" }
+runtime_compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref="lifecycleRuntimeKtx"}
 
 [bundles]
 koin = [

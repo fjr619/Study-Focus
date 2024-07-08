@@ -78,8 +78,11 @@ dependencies {
     ksp(libs.room.compiler)
     implementation(libs.room.ktx)
 
-    implementation(libs.compose.navigation)
+    implementation(libs.compose.destination.core)
+    ksp(libs.compose.destination.ksp)
     implementation(libs.google.fonts)
+
+    implementation(libs.runtime.compose)
 
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 }

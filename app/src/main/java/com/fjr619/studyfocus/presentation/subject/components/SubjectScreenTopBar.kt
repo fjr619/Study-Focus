@@ -1,6 +1,7 @@
 package com.fjr619.studyfocus.presentation.subject.components
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
@@ -16,6 +17,7 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.compose.dropUnlessResumed
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,9 +36,11 @@ fun SubjectScreenTopBar(
         ),
         scrollBehavior = scrollBehavior,
         navigationIcon = {
-            IconButton(onClick = onBackButtonClick) {
+            IconButton(onClick = dropUnlessResumed {
+                onBackButtonClick()
+            }) {
                 Icon(
-                    imageVector = Icons.Default.ArrowBack,
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "navigate back"
                 )
             }
@@ -50,13 +54,17 @@ fun SubjectScreenTopBar(
             )
         },
         actions = {
-            IconButton(onClick = onDeleteButtonClick) {
+            IconButton(onClick = dropUnlessResumed {
+                onDeleteButtonClick()
+            }) {
                 Icon(
                     imageVector = Icons.Default.Delete,
                     contentDescription = "Delete Subject"
                 )
             }
-            IconButton(onClick = onEditButtonClick) {
+            IconButton(onClick = dropUnlessResumed {
+                onEditButtonClick()
+            }) {
                 Icon(
                     imageVector = Icons.Default.Edit,
                     contentDescription = "Edit Subject"

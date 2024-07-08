@@ -17,6 +17,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.dropUnlessResumed
 import com.fjr619.studyfocus.domain.Dummy
 import com.fjr619.studyfocus.presentation.components.DeleteDialog
 import com.fjr619.studyfocus.presentation.components.StudySessionsList
@@ -25,11 +26,28 @@ import com.fjr619.studyfocus.presentation.session.components.ButtonTimer
 import com.fjr619.studyfocus.presentation.session.components.RelatedToSubjectSection
 import com.fjr619.studyfocus.presentation.session.components.SessionScreenTopBar
 import com.fjr619.studyfocus.presentation.session.components.TimerSection
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.annotation.RootNavGraph
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
+
+@RootNavGraph
+@Destination
+@Composable
+fun SessionScreen(
+    navigator: DestinationsNavigator
+) {
+    SessionContent(
+        onBackButtonClick = { navigator.popBackStack() }
+    )
+}
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SessionScreen() {
+fun SessionContent(
+    onBackButtonClick: () -> Unit
+) {
 
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState()
@@ -63,7 +81,9 @@ fun SessionScreen() {
 
     Scaffold(
         topBar = {
-            SessionScreenTopBar(onBackButtonClick = {})
+            SessionScreenTopBar(onBackButtonClick = dropUnlessResumed {
+                onBackButtonClick()
+            })
         }
     ) { paddingValues ->
         LazyColumn(

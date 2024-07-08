@@ -17,6 +17,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.dropUnlessResumed
 import com.fjr619.studyfocus.presentation.util.Priority
 
 @Composable
@@ -30,7 +31,11 @@ fun TaskCheckBox(
             .size(25.dp)
             .clip(CircleShape)
             .border(2.dp, borderColor, CircleShape)
-            .clickable { onCheckBoxClick() },
+            .clickable(
+                onClick = dropUnlessResumed {
+                    onCheckBoxClick()
+                }
+            ),
         contentAlignment = Alignment.Center
     ) {
         AnimatedVisibility(visible = isComplete) {

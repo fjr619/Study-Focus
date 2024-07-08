@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.dropUnlessResumed
 
 @Composable
 fun ButtonTimer(
@@ -23,19 +24,25 @@ fun ButtonTimer(
         modifier = modifier,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Button(onClick = cancelButtonClick) {
+        Button(onClick = dropUnlessResumed {
+            cancelButtonClick()
+        }) {
             Text(
                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
                 text = "Cancel"
             )
         }
-        Button(onClick = startButtonClick) {
+        Button(onClick = dropUnlessResumed {
+            startButtonClick()
+        }) {
             Text(
                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
                 text = "Start"
             )
         }
-        Button(onClick = finishButtonClick) {
+        Button(onClick = dropUnlessResumed {
+            finishButtonClick()
+        }) {
             Text(
                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
                 text = "Finish"

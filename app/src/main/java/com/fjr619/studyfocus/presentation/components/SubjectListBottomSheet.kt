@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Surface
@@ -23,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.dropUnlessResumed
 import com.fjr619.studyfocus.domain.Dummy
 import com.fjr619.studyfocus.domain.model.Subject
 
@@ -48,7 +50,7 @@ fun SubjectListBottomSheet(
                     BottomSheetDefaults.DragHandle()
                     Text(text = bottomSheetTitle)
                     Spacer(modifier = Modifier.height(10.dp))
-                    Divider()
+                    HorizontalDivider()
                 }
             }
         ) {
@@ -59,7 +61,9 @@ fun SubjectListBottomSheet(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { onSubjectClicked(subject) }
+                            .clickable(
+                                onClick = dropUnlessResumed { onSubjectClicked(subject) }
+                            )
                             .padding(8.dp)
                     ) {
                         Text(text = subject.name)

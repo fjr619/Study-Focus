@@ -45,12 +45,34 @@ import com.fjr619.studyfocus.presentation.theme.Red
 import com.fjr619.studyfocus.presentation.util.Priority
 import com.fjr619.studyfocus.presentation.util.changeMillisToDateString
 import com.fjr619.studyfocus.presentation.util.withoutTime
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.annotation.RootNavGraph
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
 import java.time.Instant
 
+data class TaskScreenNavArgs(
+    val taskId: Int?,
+    val subjectId: Int?
+)
+
+@RootNavGraph
+@Destination(navArgsDelegate = TaskScreenNavArgs::class)
+@Composable
+fun TaskScreen(
+    navigator: DestinationsNavigator
+) {
+    TaskContent(
+        onBackButtonClick = { navigator.popBackStack() }
+    )
+}
+
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TaskScreen() {
+fun TaskContent(
+    onBackButtonClick: () -> Unit
+) {
 
     var isDeleteDialogOpen by rememberSaveable { mutableStateOf(false) }
 
@@ -117,7 +139,7 @@ fun TaskScreen() {
                 isTaskExist = true,
                 isComplete = false,
                 checkBoxBorderColor = Red,
-                onBackButtonClick = { },
+                onBackButtonClick = onBackButtonClick,
                 onDeleteButtonClick = { isDeleteDialogOpen = true },
                 onCheckBoxClick = {}
             )
