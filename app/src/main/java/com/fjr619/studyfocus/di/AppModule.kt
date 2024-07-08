@@ -13,7 +13,9 @@ import com.fjr619.studyfocus.data.repository.TaskRepositoryImpl
 import com.fjr619.studyfocus.domain.repository.SessionRepository
 import com.fjr619.studyfocus.domain.repository.SubjectRepository
 import com.fjr619.studyfocus.domain.repository.TaskRepository
+import com.fjr619.studyfocus.presentation.dashboard.DashboardViewModel
 import org.koin.android.ext.koin.androidContext
+import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
 val databaseModule = module {
@@ -22,8 +24,7 @@ val databaseModule = module {
             androidContext(),
             AppDatabase::class.java,
             "study_focus_database"
-        ).addTypeConverter(ColorListConverter())
-            .fallbackToDestructiveMigration()
+        )
             .build()
     }
 
@@ -36,4 +37,8 @@ val repositoryModule = module {
     factory<SubjectRepository> { SubjectRepositoryImpl(get()) }
     factory<TaskRepository> { TaskRepositoryImpl(get()) }
     factory<SessionRepository> { SessionRepositoryImpl(get()) }
+}
+
+val viewmodelModule = module {
+    viewModel { DashboardViewModel(get(), get(), get()) }
 }

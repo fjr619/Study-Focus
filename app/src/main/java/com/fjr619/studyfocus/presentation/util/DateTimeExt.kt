@@ -18,3 +18,8 @@ fun Long?.changeMillisToDateString(): String {
 
 fun Instant.withoutTime() = atZone(ZoneOffset.UTC).withHour(0)
     .withMinute(0).withSecond(0).withNano(0).toInstant()
+
+fun Long.toHours(): Float {
+    val hours = this.toFloat() / 3600f
+    return "%.2f".format(hours).toFloat()
+}

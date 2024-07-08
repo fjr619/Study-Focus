@@ -22,6 +22,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -32,6 +33,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.dropUnlessResumed
 import com.fjr619.studyfocus.domain.model.Subject
+import com.fjr619.studyfocus.presentation.util.DecimalFormatter
+import com.fjr619.studyfocus.presentation.util.DecimalInputVisualTransformation
 
 @Composable
 fun AddSubjectDialog(
@@ -62,6 +65,8 @@ fun AddSubjectDialog(
         goalHours.toFloat() > 1000f -> "Please set a maximum of 1000 hours."
         else -> null
     }
+
+    val decimalFormatter = DecimalFormatter()
 
     if (isOpen) {
         AlertDialog(
@@ -106,12 +111,32 @@ fun AddSubjectDialog(
                     Spacer(modifier = Modifier.height(10.dp))
                     OutlinedTextField(
                         value = goalHours,
-                        onValueChange = onGoalHoursChange,
+                        onValueChange = {
+                            onGoalHoursChange(decimalFormatter.cleanup(it))
+                        },
                         label = { Text(text = "Goal Study Hours") },
                         singleLine = true,
                         isError = goalHoursError != null && goalHours.isNotBlank(),
                         supportingText = { Text(text = goalHoursError.orEmpty())},
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        visualTransformation = DecimalInputVisualTransformation(decimalFormatter)
+                    )
+
+                    var text by remember {
+                        mutableStateOf("1.0")
+                    }
+
+                    OutlinedTextField(
+                        value = text,
+                        onValueChange = {
+                            text = decimalFormatter.cleanup(it)
+                        },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(
+                            autoCorrect = true,
+                            keyboardType = KeyboardType.Decimal,
+                        ),
+                        visualTransformation = DecimalInputVisualTransformation(decimalFormatter)
                     )
                 }
             },

@@ -18,8 +18,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.fjr619.studyfocus.domain.Dummy
+import com.fjr619.studyfocus.domain.model.Session
 import com.fjr619.studyfocus.domain.model.Subject
+import com.fjr619.studyfocus.domain.model.Task
 import com.fjr619.studyfocus.presentation.components.AddSubjectDialog
 import com.fjr619.studyfocus.presentation.components.StudySessionsList
 import com.fjr619.studyfocus.presentation.components.TasksList
@@ -34,6 +37,7 @@ import com.fjr619.studyfocus.presentation.task.TaskScreenNavArgs
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import org.koin.androidx.compose.koinViewModel
 
 @RootNavGraph(start = true)
 @Destination
@@ -41,7 +45,17 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 fun DashboardScreen(
     navigator: DestinationsNavigator
 ) {
+
+    val dashboardViewModel = koinViewModel<DashboardViewModel>()
+    val state by dashboardViewModel.state.collectAsStateWithLifecycle()
+    val tasks by dashboardViewModel.tasks.collectAsStateWithLifecycle()
+    val recentSessions by dashboardViewModel.recentSessions.collectAsStateWithLifecycle()
+
     DashboardContent(
+        state = state,
+        tasks = tasks,
+        recentSessions = recentSessions,
+        onEvent = dashboardViewModel::onEvent,
         onSubjectCardClick = { subjectId ->
             subjectId?.let {
                 navigator.navigate(
@@ -65,26 +79,34 @@ fun DashboardScreen(
 @Composable
 fun DashboardContent(
     modifier: Modifier = Modifier,
+    state: DashboardContract.State,
+    tasks: List<Task>,
+    recentSessions: List<Session>,
+    onEvent: (DashboardContract.Event) -> Unit,
     onSubjectCardClick: (Int?) -> Unit,
     onTaskCardClick: (Int?) -> Unit,
     onStartSessionButtonClick: () -> Unit,
 ) {
 
     var isAddSubjectDialogOpen by rememberSaveable { mutableStateOf(false) }
-    var subjectName by remember { mutableStateOf("") }
-    var goalHours by remember { mutableStateOf("") }
-    var selectedColor by remember { mutableStateOf(listOf<Color>()) }
 
+    //TODO improvements
     AddSubjectDialog(
         isOpen = isAddSubjectDialogOpen,
-        selectedColors = selectedColor,
-        subjectName = subjectName,
-        goalHours = goalHours,
-        onColorChange = { selectedColor = it },
-        onSubjectNameChange = { subjectName = it },
-        onGoalHoursChange = { goalHours = it },
-        onDismissRequest = { isAddSubjectDialogOpen = false },
-        onConfirmButtonClick = { isAddSubjectDialogOpen = false }
+        selectedColors = state.newSubjectCardColors,
+        subjectName = state.newSubjectName,
+        goalHours = state.newSubjectGoalStudyHours,
+        onColorChange = { onEvent(DashboardContract.Event.OnSubjectCardColorChange(it)) },
+        onSubjectNameChange = { onEvent(DashboardContract.Event.OnSubjectNameChange(it)) },
+        onGoalHoursChange = { onEvent(DashboardContract.Event.OnGoalStudyHoursChange(it)) },
+        onDismissRequest = {
+            onEvent(DashboardContract.Event.ResetSubject)
+            isAddSubjectDialogOpen = false
+                           },
+        onConfirmButtonClick = {
+            onEvent(DashboardContract.Event.SaveSubject)
+            isAddSubjectDialogOpen = false
+        }
     )
 
     Scaffold(
@@ -102,17 +124,17 @@ fun DashboardContent(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(12.dp),
-                    subjectCount = 0,
-                    studiedHours = "0",
-                    goalHours = "0"
+                    subjectCount = state.totalSubjectCount,
+                    studiedHours = state.totalStudiedHours.toString(),
+                    goalHours = state.totalGoalStudyHours.toString()
                 )
             }
             item {
                 SubjectCardsSection(
                     modifier = Modifier.fillMaxWidth(),
-                    subjectList = Dummy.subjects,
+                    subjectList = state.subjects,
                     onAddIconClicked = {
-                        selectedColor = Subject.subjectCardColors.random()
+                        onEvent(DashboardContract.Event.ResetSubject)
                         isAddSubjectDialogOpen = true
                     },
                     onSubjectClicked = onSubjectCardClick
@@ -133,8 +155,8 @@ fun DashboardContent(
                 sectionTitle = "UPCOMING TASKS",
                 emptyListText = "You don't have any upcoming tasks.\n " +
                         "Click the + button in subject screen to add new task.",
-                tasks = listOf(),
-                onCheckBoxClick = { /*TODO*/ },
+                tasks = tasks,
+                onCheckBoxClick = { onEvent(DashboardContract.Event.OnTaskIsCompleteChange(it)) },
                 onTaskCardClick = onTaskCardClick
             )
 
@@ -146,8 +168,8 @@ fun DashboardContent(
                 sectionTitle = "RECENT STUDY SESSIONS",
                 emptyListText = "You don't have any recent study sessions.\n " +
                         "Start a study session to begin recording your progress.",
-                sessions = listOf(),
-                onDeleteIconClick = {}
+                sessions = recentSessions,
+                onDeleteIconClick = { onEvent(DashboardContract.Event.OnDeleteSessionButtonClick(it)) }
             )
         }
     }
