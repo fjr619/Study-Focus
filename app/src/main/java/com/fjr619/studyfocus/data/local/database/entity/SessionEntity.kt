@@ -4,7 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity
-data class Session(
+data class SessionEntity(
     val relatedToSubject: String,
     val date: Long,
     val duration: Long,
