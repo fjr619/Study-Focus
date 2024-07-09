@@ -25,21 +25,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.dropUnlessResumed
-import com.fjr619.studyfocus.domain.Dummy
-import com.fjr619.studyfocus.domain.model.Subject
 import com.fjr619.studyfocus.presentation.components.AddSubjectDialog
 import com.fjr619.studyfocus.presentation.components.DeleteDialog
 import com.fjr619.studyfocus.presentation.components.StudySessionsList
 import com.fjr619.studyfocus.presentation.components.TasksList
-import com.fjr619.studyfocus.presentation.destinations.SubjectScreenDestination
 import com.fjr619.studyfocus.presentation.destinations.TaskScreenDestination
 import com.fjr619.studyfocus.presentation.subject.components.SubjectOverviewSection
 import com.fjr619.studyfocus.presentation.subject.components.SubjectScreenTopBar
 import com.fjr619.studyfocus.presentation.task.TaskScreenNavArgs
+import com.fjr619.studyfocus.presentation.util.ObserveAsEvents
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import org.koin.androidx.compose.koinViewModel
 
 data class SubjectScreenNavArgs(
     val subjectId: Int
@@ -53,7 +53,18 @@ data class SubjectScreenNavArgs(
 fun SubjectScreen(
     navigator: DestinationsNavigator
 ) {
+    val viewModel: SubjectViewModel = koinViewModel()
+    val state by viewModel.state.collectAsStateWithLifecycle()
+
+    ObserveAsEvents(flow = viewModel.events) { event ->
+        when (event) {
+            SubjectContract.Event.NavigateBack -> navigator.navigateUp()
+        }
+    }
+
     SubjectContent(
+        state = state,
+        onAction = viewModel::onAction,
         onBackButtonClick = { navigator.navigateUp() },
         onAddTaskButtonClick = {
             val navArg = TaskScreenNavArgs(taskId = null, subjectId = -1)
@@ -69,6 +80,8 @@ fun SubjectScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SubjectContent(
+    state: SubjectContract.State,
+    onAction: (SubjectContract.Action) -> Unit,
     onBackButtonClick: () -> Unit,
     onAddTaskButtonClick: () -> Unit,
     onTaskCardClick: (Int?) -> Unit
@@ -82,20 +95,25 @@ fun SubjectContent(
     var isDeleteSubjectDialogOpen by rememberSaveable { mutableStateOf(false) }
     var isDeleteSessionDialogOpen by rememberSaveable { mutableStateOf(false) }
 
-    var subjectName by remember { mutableStateOf("") }
-    var goalHours by remember { mutableStateOf("") }
-    var selectedColor by remember { mutableStateOf(Subject.subjectCardColors.random()) }
+    //TODO improvements
+//    LaunchedEffect(key1 = state.studiedHours, key2 = state.goalStudyHours) {
+//        onEvent(SubjectContract.Event.UpdateProgress)
+//    }
 
     AddSubjectDialog(
         isOpen = isEditSubjectDialogOpen,
-        subjectName = subjectName,
-        goalHours = goalHours,
-        onSubjectNameChange = { subjectName = it },
-        onGoalHoursChange = { goalHours = it },
-        selectedColors = selectedColor,
-        onColorChange = { selectedColor = it },
-        onDismissRequest = { isEditSubjectDialogOpen = false },
+        subjectName = state.subjectName,
+        goalHours = state.goalStudyHours,
+        onSubjectNameChange = { onAction(SubjectContract.Action.OnSubjectNameChange(it)) },
+        onGoalHoursChange = { onAction(SubjectContract.Action.OnGoalStudyHoursChange(it)) },
+        selectedColors = state.subjectCardColors,
+        onColorChange = { onAction(SubjectContract.Action.OnSubjectCardColorChange(it)) },
+        onDismissRequest = {
+            onAction(SubjectContract.Action.ResetSubject)
+            isEditSubjectDialogOpen = false
+        },
         onConfirmButtonClick = {
+            onAction(SubjectContract.Action.UpdateSubject)
             isEditSubjectDialogOpen = false
         }
     )
@@ -106,7 +124,10 @@ fun SubjectContent(
         bodyText = "Are you sure, you want to delete this subject? All related " +
                 "tasks and study sessions will be permanently removed. This action can not be undone",
         onDismissRequest = { isDeleteSubjectDialogOpen = false },
-        onConfirmButtonClick = { isDeleteSubjectDialogOpen = false }
+        onConfirmButtonClick = {
+            onAction(SubjectContract.Action.DeleteSubject)
+            isDeleteSubjectDialogOpen = false
+        }
     )
 
     DeleteDialog(
@@ -122,7 +143,7 @@ fun SubjectContent(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             SubjectScreenTopBar(
-                title = "English",
+                title = state.subjectName,
                 onBackButtonClick = onBackButtonClick,
                 onDeleteButtonClick = { isDeleteSubjectDialogOpen = true },
                 onEditButtonClick = { isEditSubjectDialogOpen = true },
@@ -151,17 +172,17 @@ fun SubjectContent(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(12.dp),
-                    studiedHours = "10",
-                    goalHours = "15",
-                    progress = 0.75f
+                    studiedHours = state.studiedHours.toString(),
+                    goalHours = state.goalStudyHours,
+                    progress = state.progress
                 )
             }
             TasksList(
                 sectionTitle = "UPCOMING TASKS",
                 emptyListText = "You don't have any upcoming tasks.\n " +
                         "Click the + button to add new task.",
-                tasks = Dummy.tasks,
-                onCheckBoxClick = { /*TODO*/ },
+                tasks = state.upcomingTasks,
+                onCheckBoxClick = { onAction(SubjectContract.Action.OnTaskIsCompleteChange(it)) },
                 onTaskCardClick = onTaskCardClick,
             )
             item {
@@ -171,8 +192,8 @@ fun SubjectContent(
                 sectionTitle = "COMPLETED TASKS",
                 emptyListText = "You don't have any completed tasks.\n " +
                         "Click the check box on completion of task.",
-                tasks = Dummy.tasks,
-                onCheckBoxClick = { /*TODO*/ },
+                tasks = state.completedTasks,
+                onCheckBoxClick = { onAction(SubjectContract.Action.OnTaskIsCompleteChange(it)) },
                 onTaskCardClick = onTaskCardClick,
             )
             item {
@@ -182,8 +203,11 @@ fun SubjectContent(
                 sectionTitle = "RECENT STUDY SESSIONS",
                 emptyListText = "You don't have any recent study sessions.\n " +
                         "Start a study session to begin recording your progress.",
-                sessions = Dummy.sessions,
-                onDeleteIconClick = { isDeleteSessionDialogOpen = true }
+                sessions = state.recentSessions,
+                onDeleteIconClick = {
+                    isDeleteSessionDialogOpen = true
+                    onAction(SubjectContract.Action.OnDeleteSessionButtonClick(it))
+                }
             )
         }
     }

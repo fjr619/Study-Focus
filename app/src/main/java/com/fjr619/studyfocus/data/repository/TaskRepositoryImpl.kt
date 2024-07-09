@@ -8,9 +8,9 @@ import com.fjr619.studyfocus.domain.repository.TaskRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-class TaskRepositoryImpl (
+class TaskRepositoryImpl(
     private val taskDao: TaskDao
-): TaskRepository {
+) : TaskRepository {
 
     override suspend fun upsertTask(task: Task) {
         taskDao.upsertTask(task.toTaskEntity())
@@ -24,12 +24,20 @@ class TaskRepositoryImpl (
         TODO("Not yet implemented")
     }
 
-    override fun getUpcomingTasksForSubject(subjectInt: Int): Flow<List<Task>> {
-        TODO("Not yet implemented")
+    override fun getUpcomingTasksForSubject(subjectId: Int): Flow<List<Task>> {
+        return taskDao.getTasksForSubject(subjectId)
+            .map {
+                it.map { taskEntity -> taskEntity.toTask() }
+            }.map { tasks -> tasks.filter { it.isComplete.not() } }
+            .map { tasks -> sortTasks(tasks) }
     }
 
-    override fun getCompletedTasksForSubject(subjectInt: Int): Flow<List<Task>> {
-        TODO("Not yet implemented")
+    override fun getCompletedTasksForSubject(subjectId: Int): Flow<List<Task>> {
+        return taskDao.getTasksForSubject(subjectId)
+            .map {
+                it.map { taskEntity -> taskEntity.toTask() }
+            }.map { tasks -> tasks.filter { it.isComplete } }
+            .map { tasks -> sortTasks(tasks) }
     }
 
     override fun getAllUpcomingTasks(): Flow<List<Task>> {
