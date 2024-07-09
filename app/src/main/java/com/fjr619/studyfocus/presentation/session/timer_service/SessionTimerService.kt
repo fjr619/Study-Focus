@@ -1,5 +1,6 @@
 package com.fjr619.studyfocus.presentation.session.timer_service
 
+import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
@@ -21,6 +22,7 @@ import kotlin.concurrent.fixedRateTimer
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
+@SuppressLint("RestrictedApi")
 class SessionTimerService : Service() {
 
     val notificationManager: NotificationManager by inject()
@@ -47,6 +49,7 @@ class SessionTimerService : Service() {
         intent?.action.let {
             when (it) {
                 ACTION_SERVICE_START -> {
+                    setPauseButton()
                     startForegroundService()
                     startTimer { hours, minutes, seconds ->
                         updateNotification(hours, minutes, seconds)
@@ -55,6 +58,8 @@ class SessionTimerService : Service() {
 
                 ACTION_SERVICE_STOP -> {
                     stopTimer()
+                    setResumeButton()
+                    setCancelButton()
                 }
 
                 ACTION_SERVICE_CANCEL -> {
@@ -128,6 +133,44 @@ class SessionTimerService : Service() {
             this@SessionTimerService.minutes.value = minutes.pad()
             this@SessionTimerService.seconds.value = seconds.pad()
         }
+    }
+
+
+    private fun setPauseButton() {
+        notificationBuilder.mActions.clear()
+        notificationBuilder.mActions.add(
+            0,
+            NotificationCompat.Action(
+                0,
+                "Pause",
+                ServiceHelper.stopPendingIntent(this)
+            )
+        )
+        notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
+    }
+
+    private fun setResumeButton() {
+        notificationBuilder.mActions.clear()
+        notificationBuilder.mActions.add(
+            0,
+            NotificationCompat.Action(
+                0,
+                "Resume",
+                ServiceHelper.resumePendingIntent(this)
+            )
+        )
+    }
+
+    private fun setCancelButton() {
+        notificationBuilder.mActions.add(
+            1,
+            NotificationCompat.Action(
+                0,
+                "Cancel",
+                ServiceHelper.cancelPendingIntent(this)
+            )
+        )
+        notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
     }
 
     inner class SessionTimerBinder : Binder() {
