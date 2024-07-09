@@ -57,37 +57,37 @@ class DashboardViewModel(
             initialValue = emptyList()
         )
 
-    fun onEvent(event: DashboardContract.Event) {
-        when (event) {
-            is DashboardContract.Event.ResetSubject -> resetNewSubject()
-            is DashboardContract.Event.OnSubjectNameChange -> {
+    fun onAction(action: DashboardContract.Action) {
+        when (action) {
+            is DashboardContract.Action.ResetSubject -> resetNewSubject()
+            is DashboardContract.Action.OnSubjectNameChange -> {
                 _state.update {
-                    it.copy(newSubjectName = event.name)
+                    it.copy(newSubjectName = action.name)
                 }
             }
 
-            is DashboardContract.Event.OnGoalStudyHoursChange -> {
+            is DashboardContract.Action.OnGoalStudyHoursChange -> {
                 _state.update {
-                    it.copy(newSubjectGoalStudyHours = event.hours)
+                    it.copy(newSubjectGoalStudyHours = action.hours)
                 }
             }
 
-            is DashboardContract.Event.OnSubjectCardColorChange -> {
+            is DashboardContract.Action.OnSubjectCardColorChange -> {
                 _state.update {
-                    it.copy(newSubjectCardColors = event.colors)
+                    it.copy(newSubjectCardColors = action.colors)
                 }
             }
 
-            is DashboardContract.Event.OnDeleteSessionButtonClick -> {
+            is DashboardContract.Action.OnDeleteSessionButtonClick -> {
                 _state.update {
-                    it.copy(session = event.session)
+                    it.copy(session = action.session)
                 }
             }
 
-            DashboardContract.Event.SaveSubject -> saveSubject()
-            DashboardContract.Event.DeleteSession -> {}
-            is DashboardContract.Event.OnTaskIsCompleteChange -> {
-                updateTask(event.task)
+            DashboardContract.Action.SaveSubject -> saveSubject()
+            DashboardContract.Action.DeleteSession -> {}
+            is DashboardContract.Action.OnTaskIsCompleteChange -> {
+                updateTask(action.task)
             }
         }
     }

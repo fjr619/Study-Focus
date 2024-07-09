@@ -19,14 +19,14 @@ class DashboardContract {
         val session: Session? = null
     )
 
-    sealed interface Event {
-        data object ResetSubject : Event
-        data object SaveSubject : Event
-        data object DeleteSession : Event
-        data class OnDeleteSessionButtonClick(val session: Session): Event
-        data class OnTaskIsCompleteChange(val task: Task): Event
-        data class OnSubjectCardColorChange(val colors: List<Color>): Event
-        data class OnSubjectNameChange(val name: String): Event
-        data class OnGoalStudyHoursChange(val hours: String): Event
+    sealed interface Action {
+        data object ResetSubject : Action
+        data object SaveSubject : Action
+        data object DeleteSession : Action
+        data class OnDeleteSessionButtonClick(val session: Session): Action
+        data class OnTaskIsCompleteChange(val task: Task): Action
+        data class OnSubjectCardColorChange(val colors: List<Color>): Action
+        data class OnSubjectNameChange(val name: String): Action
+        data class OnGoalStudyHoursChange(val hours: String): Action
     }
 }

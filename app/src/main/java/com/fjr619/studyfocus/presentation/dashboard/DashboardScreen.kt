@@ -12,16 +12,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.fjr619.studyfocus.domain.Dummy
 import com.fjr619.studyfocus.domain.model.Session
-import com.fjr619.studyfocus.domain.model.Subject
 import com.fjr619.studyfocus.domain.model.Task
 import com.fjr619.studyfocus.presentation.components.AddSubjectDialog
 import com.fjr619.studyfocus.presentation.components.StudySessionsList
@@ -55,7 +51,7 @@ fun DashboardScreen(
         state = state,
         tasks = tasks,
         recentSessions = recentSessions,
-        onEvent = dashboardViewModel::onEvent,
+        onAction = dashboardViewModel::onAction,
         onSubjectCardClick = { subjectId ->
             subjectId?.let {
                 navigator.navigate(
@@ -82,7 +78,7 @@ fun DashboardContent(
     state: DashboardContract.State,
     tasks: List<Task>,
     recentSessions: List<Session>,
-    onEvent: (DashboardContract.Event) -> Unit,
+    onAction: (DashboardContract.Action) -> Unit,
     onSubjectCardClick: (Int?) -> Unit,
     onTaskCardClick: (Int?) -> Unit,
     onStartSessionButtonClick: () -> Unit,
@@ -96,15 +92,15 @@ fun DashboardContent(
         selectedColors = state.newSubjectCardColors,
         subjectName = state.newSubjectName,
         goalHours = state.newSubjectGoalStudyHours,
-        onColorChange = { onEvent(DashboardContract.Event.OnSubjectCardColorChange(it)) },
-        onSubjectNameChange = { onEvent(DashboardContract.Event.OnSubjectNameChange(it)) },
-        onGoalHoursChange = { onEvent(DashboardContract.Event.OnGoalStudyHoursChange(it)) },
+        onColorChange = { onAction(DashboardContract.Action.OnSubjectCardColorChange(it)) },
+        onSubjectNameChange = { onAction(DashboardContract.Action.OnSubjectNameChange(it)) },
+        onGoalHoursChange = { onAction(DashboardContract.Action.OnGoalStudyHoursChange(it)) },
         onDismissRequest = {
-            onEvent(DashboardContract.Event.ResetSubject)
+            onAction(DashboardContract.Action.ResetSubject)
             isAddSubjectDialogOpen = false
                            },
         onConfirmButtonClick = {
-            onEvent(DashboardContract.Event.SaveSubject)
+            onAction(DashboardContract.Action.SaveSubject)
             isAddSubjectDialogOpen = false
         }
     )
@@ -134,7 +130,7 @@ fun DashboardContent(
                     modifier = Modifier.fillMaxWidth(),
                     subjectList = state.subjects,
                     onAddIconClicked = {
-                        onEvent(DashboardContract.Event.ResetSubject)
+                        onAction(DashboardContract.Action.ResetSubject)
                         isAddSubjectDialogOpen = true
                     },
                     onSubjectClicked = onSubjectCardClick
@@ -156,7 +152,7 @@ fun DashboardContent(
                 emptyListText = "You don't have any upcoming tasks.\n " +
                         "Click the + button in subject screen to add new task.",
                 tasks = tasks,
-                onCheckBoxClick = { onEvent(DashboardContract.Event.OnTaskIsCompleteChange(it)) },
+                onCheckBoxClick = { onAction(DashboardContract.Action.OnTaskIsCompleteChange(it)) },
                 onTaskCardClick = onTaskCardClick
             )
 
@@ -169,7 +165,7 @@ fun DashboardContent(
                 emptyListText = "You don't have any recent study sessions.\n " +
                         "Start a study session to begin recording your progress.",
                 sessions = recentSessions,
-                onDeleteIconClick = { onEvent(DashboardContract.Event.OnDeleteSessionButtonClick(it)) }
+                onDeleteIconClick = { onAction(DashboardContract.Action.OnDeleteSessionButtonClick(it)) }
             )
         }
     }
