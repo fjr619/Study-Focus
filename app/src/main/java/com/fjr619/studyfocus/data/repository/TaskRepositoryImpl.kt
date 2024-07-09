@@ -17,11 +17,11 @@ class TaskRepositoryImpl(
     }
 
     override suspend fun deleteTask(taskId: Int) {
-        TODO("Not yet implemented")
+        taskDao.deleteTask(taskId)
     }
 
     override suspend fun getTaskById(taskId: Int): Task? {
-        TODO("Not yet implemented")
+        return taskDao.getTaskById(taskId)?.toTask()
     }
 
     override fun getUpcomingTasksForSubject(subjectId: Int): Flow<List<Task>> {

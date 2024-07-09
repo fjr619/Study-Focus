@@ -14,7 +14,9 @@ import com.fjr619.studyfocus.domain.repository.SessionRepository
 import com.fjr619.studyfocus.domain.repository.SubjectRepository
 import com.fjr619.studyfocus.domain.repository.TaskRepository
 import com.fjr619.studyfocus.presentation.dashboard.DashboardViewModel
+import com.fjr619.studyfocus.presentation.session.SessionViewModel
 import com.fjr619.studyfocus.presentation.subject.SubjectViewModel
+import com.fjr619.studyfocus.presentation.task.TaskViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
@@ -43,4 +45,6 @@ val repositoryModule = module {
 val viewmodelModule = module {
     viewModel { DashboardViewModel(get(), get(), get()) }
     viewModel { SubjectViewModel(get(), get(), get(), get()) }
+    viewModel { TaskViewModel(get(), get(), get()) }
+    viewModel { SessionViewModel() }
 }

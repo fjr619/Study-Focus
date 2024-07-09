@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.dropUnlessResumed
 import com.fjr619.studyfocus.domain.model.Task
 import com.fjr619.studyfocus.presentation.util.Priority
+import com.fjr619.studyfocus.presentation.util.changeMillisToDateString
 
 @Composable
 fun TaskCard(
@@ -64,7 +65,7 @@ fun TaskCard(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "${task.dueDate}",
+                    text = task.dueDate.changeMillisToDateString(),
                     style = MaterialTheme.typography.bodySmall
                 )
             }

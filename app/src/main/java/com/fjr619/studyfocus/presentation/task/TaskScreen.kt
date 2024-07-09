@@ -35,13 +35,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.fjr619.studyfocus.domain.Dummy
 import com.fjr619.studyfocus.presentation.components.DeleteDialog
 import com.fjr619.studyfocus.presentation.components.SubjectListBottomSheet
 import com.fjr619.studyfocus.presentation.components.TaskDatePicker
+import com.fjr619.studyfocus.presentation.subject.SubjectContract
 import com.fjr619.studyfocus.presentation.task.components.PriorityButton
 import com.fjr619.studyfocus.presentation.task.components.TaskScreenTopBar
 import com.fjr619.studyfocus.presentation.theme.Red
+import com.fjr619.studyfocus.presentation.util.ObserveAsEvents
 import com.fjr619.studyfocus.presentation.util.Priority
 import com.fjr619.studyfocus.presentation.util.changeMillisToDateString
 import com.fjr619.studyfocus.presentation.util.withoutTime
@@ -49,6 +52,7 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 import java.time.Instant
 
 data class TaskScreenNavArgs(
@@ -62,7 +66,18 @@ data class TaskScreenNavArgs(
 fun TaskScreen(
     navigator: DestinationsNavigator
 ) {
+    val viewModel: TaskViewModel = koinViewModel()
+    val state by viewModel.state.collectAsStateWithLifecycle()
+
+    ObserveAsEvents(flow = viewModel.events) { event ->
+        when (event) {
+            TaskContract.Event.NavigateBack -> navigator.navigateUp()
+        }
+    }
+
     TaskContent(
+        state = state,
+        onAction = viewModel::onAction,
         onBackButtonClick = { navigator.popBackStack() }
     )
 }
@@ -71,6 +86,8 @@ fun TaskScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskContent(
+    state: TaskContract.State,
+    onAction: (TaskContract.Action) -> Unit,
     onBackButtonClick: () -> Unit
 ) {
 
@@ -90,14 +107,11 @@ fun TaskContent(
     val sheetState = rememberModalBottomSheetState()
     var isBottomSheetOpen by remember { mutableStateOf(false) }
 
-    var title by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
-
     var taskTitleError by rememberSaveable { mutableStateOf<String?>(null) }
     taskTitleError = when {
-        title.isBlank() -> "Please enter task title."
-        title.length < 4 -> "Task title is too short."
-        title.length > 30 -> "Task title is too long."
+        state.title.isBlank() -> "Please enter task title."
+        state.title.length < 4 -> "Task title is too short."
+        state.title.length > 30 -> "Task title is too long."
         else -> null
     }
 
@@ -108,6 +122,7 @@ fun TaskContent(
                 "This action can not be undone.",
         onDismissRequest = { isDeleteDialogOpen = false },
         onConfirmButtonClick = {
+            onAction(TaskContract.Action.DeleteTask)
             isDeleteDialogOpen = false
         }
     )
@@ -117,6 +132,7 @@ fun TaskContent(
         isOpen = isDatePickerDialogOpen,
         onDismissRequest = { isDatePickerDialogOpen = false },
         onConfirmButtonClicked = {
+            onAction(TaskContract.Action.OnDateChange(millis = datePickerState.selectedDateMillis))
             isDatePickerDialogOpen = false
         }
     )
@@ -124,24 +140,27 @@ fun TaskContent(
     SubjectListBottomSheet(
         sheetState = sheetState,
         isOpen = isBottomSheetOpen,
-        subjects = Dummy.subjects,
+        subjects = state.subjects,
         onDismissRequest = { isBottomSheetOpen = false },
-        onSubjectClicked = {
+        onSubjectClicked = { subject ->
             scope.launch { sheetState.hide() }.invokeOnCompletion {
                 if (!sheetState.isVisible) isBottomSheetOpen = false
             }
+            onAction(TaskContract.Action.OnRelatedSubjectSelect(subject))
         }
     )
 
     Scaffold(
         topBar = {
             TaskScreenTopBar(
-                isTaskExist = true,
-                isComplete = false,
-                checkBoxBorderColor = Red,
+                isTaskExist = state.currentTaskId != null,
+                isComplete = state.isTaskComplete,
+                checkBoxBorderColor = state.priority.color,
                 onBackButtonClick = onBackButtonClick,
                 onDeleteButtonClick = { isDeleteDialogOpen = true },
-                onCheckBoxClick = {}
+                onCheckBoxClick = {
+                    onAction(TaskContract.Action.OnIsCompleteChange)
+                }
             )
         }
     ) { paddingValue ->
@@ -154,18 +173,18 @@ fun TaskContent(
         ) {
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
-                value = title,
-                onValueChange = { title = it },
+                value = state.title,
+                onValueChange = { onAction(TaskContract.Action.OnTitleChange(it)) },
                 label = { Text(text = "Title") },
                 singleLine = true,
-                isError = taskTitleError != null && title.isNotBlank(),
+                isError = taskTitleError != null && state.title.isNotBlank(),
                 supportingText = { Text(text = taskTitleError.orEmpty()) }
             )
             Spacer(modifier = Modifier.height(10.dp))
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
-                value = description,
-                onValueChange = { description = it },
+                value = state.description,
+                onValueChange = { onAction(TaskContract.Action.OnDescriptionChange(it)) },
                 label = { Text(text = "Description") },
             )
             Spacer(modifier = Modifier.height(20.dp))
@@ -179,7 +198,7 @@ fun TaskContent(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = datePickerState.selectedDateMillis.changeMillisToDateString(),
+                    text = state.dueDate.changeMillisToDateString(),
                     style = MaterialTheme.typography.bodyLarge
                 )
                 IconButton(onClick = { isDatePickerDialogOpen = true }) {
@@ -201,13 +220,13 @@ fun TaskContent(
                         modifier = Modifier.weight(1f),
                         label = priority.title,
                         backgroundColor = priority.color,
-                        borderColor = if (priority == Priority.MEDIUM) {
+                        borderColor = if (priority == state.priority) {
                             Color.White
                         } else Color.Transparent,
-                        labelColor = if (priority == Priority.MEDIUM) {
+                        labelColor = if (priority == state.priority) {
                             Color.White
                         } else Color.White.copy(alpha = 0.7f),
-                        onClick = { /*TODO*/ }
+                        onClick = { onAction(TaskContract.Action.OnPriorityChange(priority)) }
                     )
                 }
             }
@@ -221,8 +240,11 @@ fun TaskContent(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                val firstSubject = state.subjects.firstOrNull()?.name ?: ""
+                println("state.relatedToSubject ${state.relatedToSubject}")
+
                 Text(
-                    text = "English",
+                    text = state.relatedToSubject ?: firstSubject,
                     style = MaterialTheme.typography.bodyLarge
                 )
                 IconButton(onClick = { isBottomSheetOpen = true }) {
@@ -234,7 +256,7 @@ fun TaskContent(
             }
             Button(
                 enabled = taskTitleError == null,
-                onClick = { /*TODO*/ },
+                onClick = { onAction(TaskContract.Action.SaveTask) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 20.dp)
