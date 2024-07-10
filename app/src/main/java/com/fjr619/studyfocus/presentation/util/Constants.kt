@@ -16,4 +16,5 @@ object Constants {
     const val RESUME_REQUEST_CODE = 103
 
     const val TIMER_STATE = "STOPWATCH_STATE"
+    const val MINIMUM_TIMER = 10
 }

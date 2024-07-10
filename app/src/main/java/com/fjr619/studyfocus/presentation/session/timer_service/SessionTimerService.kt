@@ -42,6 +42,7 @@ class SessionTimerService : Service() {
         private set
     var currentTimerState = mutableStateOf(TimerState.IDLE)
         private set
+    var subjectId = mutableStateOf<Int?>(null)
 
     override fun onBind(p0: Intent?) = binder
 

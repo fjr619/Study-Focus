@@ -85,7 +85,7 @@ class DashboardViewModel(
             }
 
             DashboardContract.Action.SaveSubject -> saveSubject()
-            DashboardContract.Action.DeleteSession -> {}
+            DashboardContract.Action.DeleteSession -> deleteSession()
             is DashboardContract.Action.OnTaskIsCompleteChange -> {
                 updateTask(action.task)
             }
@@ -152,6 +152,26 @@ class DashboardViewModel(
 //                    SnackbarEvent.ShowSnackbar(
 //                        "Couldn't update task. ${e.message}",
 //                        SnackbarDuration.Long
+//                    )
+//                )
+            }
+        }
+    }
+
+    private fun deleteSession() {
+        viewModelScope.launch {
+            try {
+                state.value.session?.let {
+                    sessionRepository.deleteSession(it)
+//                    _snackbarEventFlow.emit(
+//                        SnackbarEvent.ShowSnackbar(message = "Session deleted successfully")
+//                    )
+                }
+            } catch (e: Exception) {
+//                _snackbarEventFlow.emit(
+//                    SnackbarEvent.ShowSnackbar(
+//                        message = "Couldn't delete session. ${e.message}",
+//                        duration = SnackbarDuration.Long
 //                    )
 //                )
             }

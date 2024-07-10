@@ -40,6 +40,7 @@ import com.fjr619.studyfocus.domain.Dummy
 import com.fjr619.studyfocus.presentation.components.DeleteDialog
 import com.fjr619.studyfocus.presentation.components.SubjectListBottomSheet
 import com.fjr619.studyfocus.presentation.components.TaskDatePicker
+import com.fjr619.studyfocus.presentation.session.components.RelatedToSubjectSection
 import com.fjr619.studyfocus.presentation.subject.SubjectContract
 import com.fjr619.studyfocus.presentation.task.components.PriorityButton
 import com.fjr619.studyfocus.presentation.task.components.TaskScreenTopBar
@@ -231,29 +232,15 @@ fun TaskContent(
                 }
             }
             Spacer(modifier = Modifier.height(30.dp))
-            Text(
-                text = "Related to subject",
-                style = MaterialTheme.typography.bodySmall
-            )
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                val firstSubject = state.subjects.firstOrNull()?.name ?: ""
-                println("state.relatedToSubject ${state.relatedToSubject}")
 
-                Text(
-                    text = state.relatedToSubject ?: firstSubject,
-                    style = MaterialTheme.typography.bodyLarge
-                )
-                IconButton(onClick = { isBottomSheetOpen = true }) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowDropDown,
-                        contentDescription = "Select Subject"
-                    )
-                }
-            }
+            RelatedToSubjectSection(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp),
+                relatedToSubject = state.relatedToSubject ?: "",
+                selectSubjectButtonClick = { isBottomSheetOpen = true }
+            )
+
             Button(
                 enabled = taskTitleError == null,
                 onClick = { onAction(TaskContract.Action.SaveTask) },

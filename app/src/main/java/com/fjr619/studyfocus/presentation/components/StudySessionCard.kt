@@ -20,6 +20,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.fjr619.studyfocus.domain.model.Session
+import com.fjr619.studyfocus.presentation.util.changeMillisToDateString
+import com.fjr619.studyfocus.presentation.util.toHours
 
 @Composable
 fun StudySessionCard(
@@ -44,13 +46,13 @@ fun StudySessionCard(
                     style = MaterialTheme.typography.titleMedium
                 )
                 Text(
-                    text = "${session.date}",
+                    text = session.date.changeMillisToDateString(),
                     style = MaterialTheme.typography.bodySmall
                 )
             }
             Spacer(modifier = Modifier.weight(1f))
             Text(
-                text = "${session.duration} hr",
+                text = "${session.duration.toHours()} hr",
                 style = MaterialTheme.typography.titleMedium
             )
             IconButton(onClick = onDeleteIconClick) {
@@ -71,7 +73,7 @@ private fun StudySessionCardPreview() {
             session =         Session(
                 relatedToSubject = "English",
                 date = 0L,
-                duration = 2,
+                duration = 3600,
                 sessionSubjectId = 0,
                 sessionId = 0
             ),

@@ -20,6 +20,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.fjr619.studyfocus.domain.model.Session
 import com.fjr619.studyfocus.domain.model.Task
 import com.fjr619.studyfocus.presentation.components.AddSubjectDialog
+import com.fjr619.studyfocus.presentation.components.DeleteDialog
 import com.fjr619.studyfocus.presentation.components.StudySessionsList
 import com.fjr619.studyfocus.presentation.components.TasksList
 import com.fjr619.studyfocus.presentation.dashboard.components.CountCardsSection
@@ -85,8 +86,8 @@ fun DashboardContent(
 ) {
 
     var isAddSubjectDialogOpen by rememberSaveable { mutableStateOf(false) }
+    var isDeleteSessionDialogOpen by rememberSaveable { mutableStateOf(false) }
 
-    //TODO improvements
     AddSubjectDialog(
         isOpen = isAddSubjectDialogOpen,
         selectedColors = state.newSubjectCardColors,
@@ -102,6 +103,18 @@ fun DashboardContent(
         onConfirmButtonClick = {
             onAction(DashboardContract.Action.SaveSubject)
             isAddSubjectDialogOpen = false
+        }
+    )
+
+    DeleteDialog(
+        isOpen = isDeleteSessionDialogOpen,
+        title = "Delete Session?",
+        bodyText = "Are you sure, you want to delete this session? Your studied hours will be reduced " +
+                "by this session time. This action can not be undone.",
+        onDismissRequest = { isDeleteSessionDialogOpen = false },
+        onConfirmButtonClick = {
+            onAction(DashboardContract.Action.DeleteSession)
+            isDeleteSessionDialogOpen = false
         }
     )
 
@@ -165,7 +178,10 @@ fun DashboardContent(
                 emptyListText = "You don't have any recent study sessions.\n " +
                         "Start a study session to begin recording your progress.",
                 sessions = recentSessions,
-                onDeleteIconClick = { onAction(DashboardContract.Action.OnDeleteSessionButtonClick(it)) }
+                onDeleteIconClick = {
+                    isDeleteSessionDialogOpen = true
+                    onAction(DashboardContract.Action.OnDeleteSessionButtonClick(it))
+                }
             )
         }
     }

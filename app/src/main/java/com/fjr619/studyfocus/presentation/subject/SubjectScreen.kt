@@ -16,6 +16,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -62,6 +63,11 @@ fun SubjectScreen(
         }
     }
 
+    //update progress
+    LaunchedEffect(key1 = state.studiedHours, key2 = state.goalStudyHours) {
+        viewModel.onAction(SubjectContract.Action.UpdateProgress)
+    }
+
     SubjectContent(
         state = state,
         onAction = viewModel::onAction,
@@ -94,11 +100,6 @@ fun SubjectContent(
     var isEditSubjectDialogOpen by rememberSaveable { mutableStateOf(false) }
     var isDeleteSubjectDialogOpen by rememberSaveable { mutableStateOf(false) }
     var isDeleteSessionDialogOpen by rememberSaveable { mutableStateOf(false) }
-
-    //TODO improvements
-//    LaunchedEffect(key1 = state.studiedHours, key2 = state.goalStudyHours) {
-//        onEvent(SubjectContract.Event.UpdateProgress)
-//    }
 
     AddSubjectDialog(
         isOpen = isEditSubjectDialogOpen,
@@ -136,7 +137,10 @@ fun SubjectContent(
         bodyText = "Are you sure, you want to delete this session? Your studied hours will be reduced " +
                 "by this session time. This action can not be undone.",
         onDismissRequest = { isDeleteSessionDialogOpen = false },
-        onConfirmButtonClick = { isDeleteSessionDialogOpen = false }
+        onConfirmButtonClick = {
+            onAction(SubjectContract.Action.DeleteSession)
+            isDeleteSessionDialogOpen = false
+        }
     )
 
     Scaffold(

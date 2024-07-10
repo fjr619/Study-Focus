@@ -50,7 +50,7 @@ val viewmodelModule = module {
     viewModel { DashboardViewModel(get(), get(), get()) }
     viewModel { SubjectViewModel(get(), get(), get(), get()) }
     viewModel { TaskViewModel(get(), get(), get()) }
-    viewModel { SessionViewModel() }
+    viewModel { SessionViewModel(get(), get()) }
 }
 
 val notificationModule = module {

@@ -91,14 +91,18 @@ class SubjectViewModel(
                 }
             }
 
-            is SubjectContract.Action.OnDeleteSessionButtonClick -> {}
+            is SubjectContract.Action.OnDeleteSessionButtonClick -> {
+                _state.update {
+                    it.copy(session = action.session)
+                }
+            }
             is SubjectContract.Action.OnTaskIsCompleteChange -> {
                 updateTask(action.task)
             }
 
             SubjectContract.Action.UpdateSubject -> updateSubject()
             SubjectContract.Action.DeleteSubject -> deleteSubject()
-            SubjectContract.Action.DeleteSession -> {}
+            SubjectContract.Action.DeleteSession -> deleteSession()
 
             SubjectContract.Action.UpdateProgress -> {
                 val goalStudyHours = state.value.goalStudyHours.toFloatOrNull() ?: 1f
@@ -214,4 +218,26 @@ class SubjectViewModel(
             }
         }
     }
+
+    private fun deleteSession() {
+        viewModelScope.launch {
+            try {
+                println("aaaa ${state.value.session}")
+                state.value.session?.let {
+                    sessionRepository.deleteSession(it)
+//                    _snackbarEventFlow.emit(
+//                        SnackbarEvent.ShowSnackbar(message = "Session deleted successfully")
+//                    )
+                }
+            } catch (e: Exception) {
+//                _snackbarEventFlow.emit(
+//                    SnackbarEvent.ShowSnackbar(
+//                        message = "Couldn't delete session. ${e.message}",
+//                        duration = SnackbarDuration.Long
+//                    )
+//                )
+            }
+        }
+    }
+
 }
