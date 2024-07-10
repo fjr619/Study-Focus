@@ -87,7 +87,7 @@ private fun TaskCardPreview() {
             priority = Priority.HIGH.value,
             dueDate = 100
         ),
-        onCheckBoxClick = { /*TODO*/ }
+        onCheckBoxClick = { }
     ) {
 
     }

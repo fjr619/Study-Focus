@@ -86,8 +86,8 @@ private fun TaskListPreview() {
                 emptyListText = "You don't have any upcoming tasks.\n " +
                         "Click the + button in subject screen to add new task.",
                 tasks = Dummy.tasks,
-                onCheckBoxClick = { /*TODO*/ },
-                onTaskCardClick = { /*TODO*/ }
+                onCheckBoxClick = {  },
+                onTaskCardClick = {  }
             )
         }
     }

@@ -47,7 +47,7 @@ private fun PRiorityButtonPreview() {
             backgroundColor = Priority.MEDIUM.color,
             borderColor = Color.White,
             labelColor = Color.White,
-            onClick = { /*TODO*/}
+            onClick = { }
         )
     }
 }

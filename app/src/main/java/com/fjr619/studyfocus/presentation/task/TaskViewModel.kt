@@ -115,10 +115,8 @@ class TaskViewModel(
         }
     }
 
-    //TODO improvements
     private fun fetchSubject() {
         viewModelScope.launch {
-            println(" navArgs.subjectId ${ navArgs.subjectId}")
             navArgs.subjectId?.let { id ->
                 subjectRepository.getSubjectById(id)?.let { subject ->
                     _state.update {
@@ -127,8 +125,6 @@ class TaskViewModel(
                             relatedToSubject = subject.name
                         )
                     }
-
-                    println("subject.name ${subject.name}")
                 }
             }
         }
